@@ -1,4 +1,4 @@
-# 🖥️ FOS - Fayoum Operating System
+# 🖥️ FOS - Operating System
 
 **FOS** is an educational operating system kernel for the x86 architecture, featuring advanced memory management with **O(1) kernel heap allocation**, multiple page replacement algorithms, and comprehensive virtual memory support.
 
