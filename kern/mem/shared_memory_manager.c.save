@@ -1,0 +1,228 @@
+#include <inc/memlayout.h>#include <inc/memlayout.h> include "shared_memory_manager.h" include "shared_memory_manager.h" include 
+#<inc/mmu.h> include <inc/error.h> include <inc/string.h> include <inc/assert.h> include <inc/queue.h> include 
+#<inc/environment_definitions.h>
+
+#include <kern/proc/user_environment.h> include <kern/trap/syscall.h> include "kheap.h" include "memory_manager.h" include <inc/mmu.h> 
+#include <inc/error.h>//==================================================================================// include 
+#<inc/string.h>//============================== GIVEN FUNCTIONS ===================================// include 
+#<inc/assert.h>//==================================================================================// include <inc/queue.h> include 
+#<inc/environment_definitions.h>//===========================
+// [1] INITIALIZE SHARES: =========================== Initialize the list and the corresponding lock
+#include <kern/proc/user_environment.h>void sharing_init() include <kern/trap/syscall.h>{ if USE_KHEAP include "kheap.h" 
+#LIST_INIT(&AllShares.shares_list) ; include "memory_manager.h" init_kspinlock(&AllShares.shareslock, "shares lock");
+	//init_sleeplock(&AllShares.sharessleeplock, "shares sleep lock");
+//==================================================================================//#else ============================== GIVEN 
+//FUNCTIONS ===================================// panic("not handled when KERN HEAP is disabled"); 
+//==================================================================================//#endif
+}
+
+//========================= [2] Find Share Object: ===========================//========================= Search for the given shared 
+//object in the "shares_list" Return:
+// [1] INITIALIZE SHARES:// a) if found: ptr to Share object b) else: NULL ===========================struct Share* find_share(int32 
+//ownerID, char* name) Initialize the list and the corresponding lock{
+void sharing_init()#if USE_KHEAP struct Share * ret = NULL; bool wasHeld = holding_kspinlock(&(AllShares.shareslock)); if (!wasHeld) { { 
+acquire_kspinlock(&(AllShares.shareslock));
+#if USE_KHEAP }
+	LIST_INIT(&AllShares.shares_list) ; { struct Share * shr ; LIST_FOREACH(shr, &(AllShares.shares_list)) { 
+	init_kspinlock(&AllShares.shareslock, "shares lock"); //cprintf("shared var name = %s compared with %s\n", name, shr->name);
+	//init_sleeplock(&AllShares.sharessleeplock, "shares sleep lock"); if(shr->ownerID == ownerID && strcmp(name, shr->name)==0)
+#else {
+	panic("not handled when KERN HEAP is disabled"); //cprintf("%s found\n", name); ret = shr; break;
+#endif }
+}		}
+	}
+	if (!wasHeld) { release_kspinlock(&(AllShares.shareslock));
+//========================= } [2] Find Share Object: return ret; =========================#else Search for the given shared object in 
+//the "shares_list" panic("not handled when KERN HEAP is disabled"); Return:#endif
+//	a) if found: ptr to Share object} b) else: NULL
+struct Share* find_share(int32 ownerID, char* name)//============================== {// [3] Get Size of Share Object:
+#if USE_KHEAP//==============================
+	struct Share * ret = NULL;int size_of_shared_object(int32 ownerID, char* shareName) { bool wasHeld = 
+	holding_kspinlock(&(AllShares.shareslock)); // This function should return the size of the given shared object if (!wasHeld) // 
+	RETURN: { // a) If found, return size of shared object
+		acquire_kspinlock(&(AllShares.shareslock)); // b) Else, return E_SHARED_MEM_NOT_EXISTS
+	}	//
+	struct Share* ptr_share = find_share(ownerID, shareName); if (ptr_share == NULL) { return E_SHARED_MEM_NOT_EXISTS; else struct 
+		Share * shr ; return ptr_share->size; LIST_FOREACH(shr, &(AllShares.shares_list)) { return 0;
+//			cprintf("shared var name = %s compared with %s\n", name, shr->name);} 
+//===========================================================
+//			cprintf("shared var id = %d compared with %d\n",ownerID , shr->ownerID);
+			if(shr->ownerID == ownerID && strcmp(name, shr->name)==0) 
+			{//==================================================================================//
+				//cprintf("%s found\n", name);//============================ REQUIRED FUNCTIONS 
+				//==================================//
+				ret = shr;//==================================================================================// break;
+			}//=====================================
+		}// [1] Alloc & Initialize Share Object:
+	}//=====================================
+	if (!wasHeld)//Allocates a new shared object and initialize its member {//It dynamically creates the "framesStorage" 
+		release_kspinlock(&(AllShares.shareslock));//Return: allocatedObject (pointer to struct Share) passed by reference
+	}struct Share* alloc_share(int32 ownerID, char* shareName, uint32 size, uint8 isWritable)
+	return ret;{
+#else //TODO: [PROJECT'25.IM#3] SHARED MEMORY - #1 alloc_share
+	panic("not handled when KERN HEAP is disabled"); //Your code is here
+#endif //Comment the following line
+}	panic("alloc_share() is not implemented yet...!!");
+}
+
+
+//========================= [4] Create Share Object: ==============================//========================= [3] Get Size of Share 
+// Object:int create_shared_object(int32 ownerID, char* shareName, uint32 size, uint8 isWritable, void* virtual_address)
+//=============================={
+int size_of_shared_object(int32 ownerID, char* shareName) //TODO: [PROJECT'25.IM#3] SHARED MEMORY - #3 create_shared_object { //Your 
+code is here
+	// This function should return the size of the given shared object //Comment the following line RETURN: 
+	// panic("create_shared_object() is not implemented yet...!!");
+	//	a) If found, return size of shared object b) Else, return E_SHARED_MEM_NOT_EXISTS struct Env* myenv = get_cpu_proc(); 
+	//	//The calling environment
+	//
+	// This function should create the shared object at the given virtual address with the given size and return the ShareObjectID 
+	// RETURN:
+	struct Share* ptr_share = find_share(ownerID, shareName); // a) ID of the shared object (its VA after masking out its msb) if 
+	success if (ptr_share == NULL) // b) E_SHARED_MEM_EXISTS if the shared object already exists
+		return E_SHARED_MEM_NOT_EXISTS; // c) E_NO_SHARE if failed to create a shared object else} return ptr_share->size;
+
+//====================== [5] Get Share Object:
+	return 0;//====================== int get_shared_object(int32 ownerID, char* shareName, void* virtual_address) {
+}	//TODO: [PROJECT'25.IM#3] SHARED MEMORY - #5 get_shared_object
+//=========================================================== //Your code is here
+	//Comment the following line
+	panic("get_shared_object() is not implemented yet...!!");
+//==================================================================================// ============================ REQUIRED FUNCTIONS 
+//==================================// struct Env* myenv = get_cpu_proc(); //The calling environment 
+//==================================================================================//
+	// 	This function should share the required object in the heap of the current environment starting from the given 
+	//	virtual_address with the specified permissions of the object: read_only/writable and return the ShareObjectID
+//===================================== // RETURN: [1] Alloc & Initialize Share Object: // a) ID of the shared object (its VA after 
+// masking out its msb) if success
+//===================================== // b) E_SHARED_MEM_NOT_EXISTS if the shared object is not exists Allocates a new shared object 
+//and initialize its member It dynamically creates the "framesStorage"} Return: allocatedObject (pointer to struct Share) passed by 
+//reference ==================================================================================// ============================== BONUS 
+//FUNCTIONS ===================================// ==================================================================================// 
+//=========================
+struct Share* alloc_share(int32 ownerID, char* shareName, uint32 size, uint8 isWritable)// [1] Delete Share Object: 
+{//=========================
+	//TODO: [PROJECT'25.IM#3] SHARED MEMORY - #1 alloc_share//delete the given shared object from the "shares_list" Your code is 
+	//here//it should free its framesStorage and the share object itself Comment the following linevoid free_share(struct Share* 
+	//ptrShare) panic("alloc_share() is not implemented yet...!!");{ TODO: [PROJECT'25.BONUS#5] EXIT #2 - free_share Your code is 
+	//here Comment the following line
+	uint32 SI=sizeof(struct Share); panic("free_share() is not implemented yet...!!"); struct Share* SHred_OBJ =(struct 
+	Share*)kmalloc(SI);}
+	//validation
+	if(SHred_OBJ==NULL) return NULL;//=========================
+    //initialization// [2] Free Share Object:
+	SHred_OBJ->references=1;//========================= int delete_shared_object(int32 sharedObjectID, void *startVA) { int 
+	NAMES=sizeof(SHred_OBJ->name); //TODO: [PROJECT'25.BONUS#5] EXIT #2 - delete_shared_object
+//	for(int i=0; i<NAMES;i++) { //Your code is here
+//	//Comment the following line
+//		SHred_OBJ->name[i]=shareName[i]; panic("delete_shared_object() is not implemented yet...!!");
+//	}
+	struct Env* myenv = get_cpu_proc(); //The calling environment strncpy(SHred_OBJ->name, shareName,NAMES-1);
+	// This function should free (delete) the shared object from the User Heapof the current environment If this is the last shared 
+	// env, then the "frames_store" should be cleared and the shared object should be deleted RETURN:
+	SHred_OBJ->ownerID= ownerID; // a) 0 if success SHred_OBJ->ID=((uint32)SHred_OBJ)& 0x7FFFFFFF;//shift to make the most 
+    significant 0 // b) E_SHARED_MEM_NOT_EXISTS if the shared object is not exists
+    //SHred_OBJ->ID=((uint32)virtual_address)& ~(1 << 31);//shift to make the most significant 0
+    SHred_OBJ->size = size; // Steps: SHred_OBJ->isWritable=isWritable; // 1) Get the shared object from the "shares" array (use 
+	get_share_object_ID()) uint32 numOFp=ROUNDUP(size,PAGE_SIZE)/PAGE_SIZE; // 2) Unmap it from the current environment "myenv"
+	//	3) If one or more table becomes empty, remove it 4) Update references 5) If this is the last share, delete the share 
+	//	object (use free_share()) 6) Flush the cache "tlbflush()"
+   	uint32 the_ss=numOFp*sizeof(struct FrameInfo*);
+}
+   	SHred_OBJ->framesStorage = (struct FrameInfo**)kmalloc(the_ss);
+   	//undo
+   if(SHred_OBJ->framesStorage ==NULL){ kfree(SHred_OBJ); return NULL;
+   }
+   //pointers to zero
+	for(uint32 i=0 ; i<numOFp ; i++){ SHred_OBJ->framesStorage[i]=NULL;
+	}
+	return SHred_OBJ;
+}
+//========================= [4] Create Share Object: =========================
+int create_shared_object(int32 ownerID, char* shareName, uint32 size, uint8 isWritable, void* virtual_address) {
+	//TODO: [PROJECT'25.IM#3] SHARED MEMORY - #3 create_shared_object Your code is here Comment the following line 
+	//panic("create_shared_object() is not implemented yet...!!");
+	struct Env* myenv = get_cpu_proc(); //The calling environment
+	// This function should create the shared object at the given virtual address with the given size and return the ShareObjectID 
+	// RETURN:
+	//	a) ID of the shared object (its VA after masking out its msb) if success b) E_SHARED_MEM_EXISTS if the shared object 
+	//	already exists c) E_NO_SHARE if failed to create a shared object
+//	struct Share * shr ; LIST_FOREACH(shr, &(AllShares.shares_list)){ cprintf("shrf %d\n", shr->ownerID);
+//			}
+	//if the shared object already exists cprintf("before if the id %d ",ownerID);
+	 struct Share* thefl =find_share(ownerID,shareName); if(thefl != NULL){ cprintf("the if "); return E_SHARED_MEM_EXISTS;
+	}
+	// cprintf("after if ");
+	struct Share* SHred_OBJ = alloc_share(ownerID,shareName,size,isWritable);
+	//if failed to create a shared object
+	if (SHred_OBJ==NULL)return E_NO_SHARE; uint32 numOFp=ROUNDUP(size,PAGE_SIZE)/PAGE_SIZE; for(uint32 i=0 ; i<numOFp ; i++){ struct 
+		  FrameInfo* ELMAKAN = NULL; allocate_frame(&ELMAKAN);
+		  	 if( ELMAKAN==NULL) return E_NO_SHARE;
+         //    if(isWritable)
+		  	  map_frame(myenv->env_page_directory,ELMAKAN,(uint32) virtual_address, PERM_PRESENT | PERM_USER | 
+		  				                  PERM_WRITEABLE);//perms
+//             else map_frame(myenv->env_page_directory,ELMAKAN,(uint32) virtual_address, PERM_PRESENT | PERM_USER );//perms
+            // cprintf("create_shared_object: mapped frame %p -> va %x (i=%d)\n", ELMAKAN, (uint32)virtual_address, i);
+	  		SHred_OBJ->framesStorage[i]=ELMAKAN;
+	  		//round down va?, trace
+	  		virtual_address+=PAGE_SIZE;
+	  	}
+//	 //locks
+//	  if (!holding_kspinlock(&AllShares.shareslock))
+	  acquire_kspinlock(&AllShares.shareslock);
+//	  cprintf("SHred_OBJ %d\n", SHred_OBJ->ID); cprintf("SHred_OBJ %d\n", SHred_OBJ->ownerID);
+	    LIST_INSERT_TAIL(&AllShares.shares_list, SHred_OBJ);
+	           // SHred_OBJ->name, SHred_OBJ->ownerID, SHred_OBJ->ID, SHred_OBJ->size);
+//	   if (holding_kspinlock(&AllShares.shareslock))
+	     release_kspinlock(&AllShares.shareslock);
+//	     LIST_FOREACH(shr, &(AllShares.shares_list)){ cprintf("shr2 %d\n", shr->ownerID);
+//	     			}
+       return SHred_OBJ->ID;
+}
+//====================== [5] Get Share Object: ======================
+int get_shared_object(int32 ownerID, char* shareName, void* virtual_address) {
+	//TODO: [PROJECT'25.IM#3] SHARED MEMORY - #5 get_shared_object Your code is here Comment the following line 
+	//panic("get_shared_object() is not implemented yet...!!");
+	struct Env* myenv = get_cpu_proc(); //The calling environment
+	// 	This function should share the required object in the heap of the current environment starting from the given 
+	//	virtual_address with the specified permissions of the object: read_only/writable and return the ShareObjectID
+	// RETURN: a) ID of the shared object (its VA after masking out its msb) if success b) E_SHARED_MEM_NOT_EXISTS if the shared 
+	//	object is not exists
+	struct Share* THE_OBCT = find_share(ownerID,shareName);
+		//if the shared object exists
+		if(THE_OBCT==NULL)return E_SHARED_MEM_NOT_EXISTS; uint32 numOFp=ROUNDUP(THE_OBCT->size,PAGE_SIZE)/PAGE_SIZE; for (uint32 
+		         i = 0; i < numOFp; ++i) {
+				  struct FrameInfo* ELMAKANnew = THE_OBCT->framesStorage[i]; if( ELMAKANnew==NULL) return E_NO_SHARE; 
+				  if((THE_OBCT->isWritable)==1)
+				  	  map_frame(myenv->env_page_directory,ELMAKANnew, (uint32)virtual_address, PERM_PRESENT | 
+				  				                  PERM_USER | PERM_WRITEABLE);//perms
+				  else map_frame(myenv->env_page_directory,ELMAKANnew, (uint32)virtual_address, PERM_PRESENT | 
+					  				  				                  PERM_USER);
+			  		//round down va?, trace
+			  		virtual_address+=PAGE_SIZE;
+			  	}
+//			  if (!holding_kspinlock(&AllShares.shareslock))
+	           acquire_kspinlock(&AllShares.shareslock); THE_OBCT->references++;
+//		      if (holding_kspinlock(&AllShares.shareslock))
+     	      release_kspinlock(&AllShares.shareslock); return THE_OBCT->ID;
+}
+//==================================================================================// ============================== BONUS FUNCTIONS 
+//===================================// ==================================================================================// 
+//=========================
+// [1] Delete Share Object: ========================= delete the given shared object from the "shares_list" it should free its 
+//framesStorage and the share object itself
+void free_share(struct Share* ptrShare) {
+	//TODO: [PROJECT'25.BONUS#5] EXIT #2 - free_share Your code is here Comment the following line
+	panic("free_share() is not implemented yet...!!");
+}
+//========================= [2] Free Share Object: =========================
+int delete_shared_object(int32 sharedObjectID, void *startVA) {
+	//TODO: [PROJECT'25.BONUS#5] EXIT #2 - delete_shared_object Your code is here Comment the following line
+	panic("delete_shared_object() is not implemented yet...!!"); struct Env* myenv = get_cpu_proc(); //The calling environment
+	// This function should free (delete) the shared object from the User Heapof the current environment If this is the last shared 
+	// env, then the "frames_store" should be cleared and the shared object should be deleted RETURN:
+	//	a) 0 if success b) E_SHARED_MEM_NOT_EXISTS if the shared object is not exists Steps: 1) Get the shared object from the 
+	//	"shares" array (use get_share_object_ID()) 2) Unmap it from the current environment "myenv" 3) If one or more table 
+	//	becomes empty, remove it 4) Update references 5) If this is the last share, delete the share object (use free_share()) 
+	//	6) Flush the cache "tlbflush()"
+}
